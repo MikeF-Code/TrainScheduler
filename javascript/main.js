@@ -55,6 +55,7 @@ database.ref().on("child_added", function(childSnapshot) {
   var frequency = childSnapshot.val().freq;
   var trainTime;
   var trainStart = moment(firstTrain, "HH:mm").unix();
+  var nextTrain;
   console.log("Moment.js converted train start time for "+trainName+": "+trainStart);
   var now = moment().unix();
   console.log("'now' variable type is: ");
@@ -63,8 +64,8 @@ database.ref().on("child_added", function(childSnapshot) {
   console.log("'trainStart' variable type is: ");
   console.log(typeof trainStart);
   console.log("Value of 'trainStart': "+trainStart);
-  var convertedFreq = moment(frequency, "m").unix();
-  console.log("Frequency converted to unix time in seconds: "+convertedFreq);
+  var convertedFreq = frequency*60;
+  console.log("Frequency converted to seconds: "+convertedFreq);
   trainTime = ((now - trainStart) % frequency);
   console.log("-----------");
   console.log("Result of modulo calculation ((now - trainStart) % frequency): "+trainTime);
@@ -76,7 +77,13 @@ database.ref().on("child_added", function(childSnapshot) {
   console.log(frequency);
   console.log("-----------");
 
+  if (trainTime <= 0) {
+    trainTime = '';
+  }
 
+  if (now < trainStart) {
+    nextTrain = childSnapshot.val().first;
+  }
 
   var newRow = $("<tr>").append(
     // Train Name
@@ -86,7 +93,7 @@ database.ref().on("child_added", function(childSnapshot) {
     // Frequency (Min)
     $("<td>").text(frequency),
     // Next Arrival
-    $("<td>").text(""),
+    $("<td>").text(nextTrain),
     // Minutes Away
     $("<td>").text(trainTime),
   );
