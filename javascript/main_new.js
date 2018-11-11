@@ -55,9 +55,9 @@ database.ref().on("child_added", function(childSnapshot) {
   var frequency = childSnapshot.val().freq;
   var trainTime;
   var trainStart = moment(firstTrain, "HH:mm").unix();
-  var nextTrain;
+  var nextTrain = moment(firstTrain).add(frequency, "minutes");
   console.log("Moment.js converted train start time for "+trainName+": "+trainStart);
-  var now = moment().unix();
+  var now = parseInt(moment().unix());
   console.log("'now' variable type is: ");
   console.log(typeof now);
   console.log("Value of 'now': "+now);
@@ -65,12 +65,12 @@ database.ref().on("child_added", function(childSnapshot) {
   console.log(typeof trainStart);
   console.log("Value of 'trainStart': "+trainStart);
   var convertedFreq = frequency*60;
-  console.log("Frequency converted to seconds: "+convertedFreq);
-  trainTime = ((now - trainStart) % convertedFreq);
-  trainTime = trainTime / 60;
-  console.log("-----------");
-  console.log("Result of modulo calculation ((now - trainStart) % frequency), converted into minutes: ");
-  console.log(trainTime);
+//   console.log("Frequency converted to seconds: "+convertedFreq);
+//   trainTime = ((now - trainStart) % convertedFreq);
+//   trainTime = trainTime / 60;
+//   console.log("-----------");
+//   console.log("Result of modulo calculation ((now - trainStart) % frequency), converted into minutes: ");
+//   console.log(trainTime);
   console.log("-----------");
   console.log("Writing the following DB information to the schedule:");
   console.log(trainName);
@@ -78,14 +78,14 @@ database.ref().on("child_added", function(childSnapshot) {
   console.log(trainTime);
   console.log(frequency);
   console.log("-----------");
-
-  if (trainTime <= 0) {
-    trainTime = '';
-  }
-
   if (now < trainStart) {
     nextTrain = childSnapshot.val().first;
+  } else while (nextTrain < now) {
+    nextTrain = moment(firstTrain).add(frequency, "minutes");
   }
+  console.log("NextTrain value: "+nextTrain);
+
+  trainTime = ((nextTrain - now)%convertedFreq);
 
   var newRow = $("<tr>").append(
     // Train Name
