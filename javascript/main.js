@@ -53,22 +53,42 @@ database.ref().on("child_added", function(childSnapshot) {
   var trainDest = childSnapshot.val().dest;
   var firstTrain = childSnapshot.val().first;
   var frequency = childSnapshot.val().freq;
-
+  var trainTime;
+  var trainStart = moment(firstTrain, "HH:mm").unix();
+  console.log("Moment.js converted train start time for "+trainName+": "+trainStart);
+  var now = moment().unix();
+  console.log("'now' variable type is: ");
+  console.log(typeof now);
+  console.log("Value of 'now': "+now);
+  console.log("'trainStart' variable type is: ");
+  console.log(typeof trainStart);
+  console.log("Value of 'trainStart': "+trainStart);
+  var convertedFreq = moment(frequency, "m").unix();
+  console.log("Frequency converted to unix time in seconds: "+convertedFreq);
+  trainTime = ((now - trainStart) % frequency);
+  console.log("-----------");
+  console.log("Result of modulo calculation ((now - trainStart) % frequency): "+trainTime);
+  console.log("-----------");
   console.log("Writing the following DB information to the schedule:");
   console.log(trainName);
   console.log(trainDest);
-  console.log(firstTrain);
+  console.log(trainTime);
   console.log(frequency);
   console.log("-----------");
 
-  var trainStart = moment(firstTrain, "HH:mm");
-  console.log("Moment.js converted train start time for "+trainName+": "+trainStart);
+
 
   var newRow = $("<tr>").append(
+    // Train Name
     $("<td>").text(trainName),
+    // Destination
     $("<td>").text(trainDest),
+    // Frequency (Min)
     $("<td>").text(frequency),
-    $("<td>").text(firstTrain),
+    // Next Arrival
+    $("<td>").text(""),
+    // Minutes Away
+    $("<td>").text(trainTime),
   );
 
   $("#schedule-table > tbody").append(newRow);
